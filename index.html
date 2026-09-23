@@ -15,7 +15,14 @@
         <form id="formReceta">
             <input type="text" id="nombreReceta" placeholder="Nombre de la receta" required>
             <input type="text" id="pastelero" placeholder="Chef / Pastelero/a" required>
-            <input type="text" id="categoria" placeholder="Categoría" required>
+            
+            <select id="categoria" required>
+                <option value="">Selecciona tipo</option>
+                <option value="Dulce">Dulce</option>
+                <option value="Salado">Salado</option>
+                <option value="Agridulce">Agridulce</option>
+            </select>
+
             <input type="number" id="tiempoPreparacion" placeholder="Tiempo (min)" required>
             <input type="text" id="dificultad" placeholder="Dificultad" required>
             <input type="url" id="imagenUrl" placeholder="URL de la imagen" required>
@@ -31,7 +38,7 @@
                     <th>Imagen</th>
                     <th>Receta</th>
                     <th>Chef / Pastelero/a</th>
-                    <th>Categoría</th>
+                    <th>Tipo</th>
                     <th>Tiempo</th>
                     <th>Dificultad</th>
                 </tr>

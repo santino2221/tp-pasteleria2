@@ -2,7 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
 import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 let firebaseConfig = {
-    databaseURL: "https://datos-de-pasteleria-default-rtdb.firebaseio.com/"
+    databaseURL: "https://datos-de-pasteleria-default-rtdb.firebaseio.com"
 };
 
 let app = initializeApp(firebaseConfig);
@@ -13,10 +13,10 @@ let formReceta = document.getElementById('formReceta');
 let tablaRecetas = document.getElementById('tablaRecetas');
 
 let cargarRecetas = () => {
-    get(recetasRef).then((snapshot) => {
+    get(recetasRef).then((datosFirebase) => {
         tablaRecetas.innerHTML = '';
-        if (snapshot.exists()) {
-            let datos = snapshot.toJSON();
+        if (datosFirebase.exists()) {
+            let datos = datosFirebase.toJSON();
             for (let id in datos) {
                 let r = datos[id];
                 let fila = document.createElement('tr');
@@ -38,30 +38,32 @@ let cargarRecetas = () => {
 
 cargarRecetas();
 
-formReceta.addEventListener('submit', (e) => {
-    e.preventDefault();
+formReceta.addEventListener('submit', (evento) => {
+    evento.preventDefault();
 
-    let nombreReceta = document.getElementById('nombreReceta').value.trim();
-    let pastelero = document.getElementById('pastelero').value.trim();
-    let categoria = document.getElementById('categoria').value.trim();
-    let tiempoPreparacion = document.getElementById('tiempoPreparacion').value.trim();
-    let dificultad = document.getElementById('dificultad').value.trim();
-    let imagenUrl = document.getElementById('imagenUrl').value.trim();
+    let nombreReceta = document.getElementById('nombreReceta').value;
+    let pastelero = document.getElementById('pastelero').value;
+    let categoria = document.getElementById('categoria').value;
+    let tiempoPreparacion = document.getElementById('tiempoPreparacion').value;
+    let dificultad = document.getElementById('dificultad').value;
+    let imagenUrl = document.getElementById('imagenUrl').value;
 
     if (!nombreReceta || !pastelero || !categoria || !tiempoPreparacion || !dificultad || !imagenUrl) {
         alert("No se pudo cargar: tenés que completar todos los campos del formulario.");
         return;
     }
 
-    let idGenerado = nombreReceta.toLowerCase().replace(/\s+/g, '-');
+    let idGenerado = nombreReceta.toLowerCase().split(' ').join('-');
 
-    set(ref(database, 'recetas/' + idGenerado), {
-        nombreReceta,
-        pastelero,
-        categoria,
-        tiempoPreparacion,
-        dificultad,
-        imagenUrl
+    let nuevaRef = ref(database, 'recetas/' + idGenerado);
+
+    set(nuevaRef, {
+        nombreReceta: nombreReceta,
+        pastelero: pastelero,
+        categoria: categoria,
+        tiempoPreparacion: tiempoPreparacion,
+        dificultad: dificultad,
+        imagenUrl: imagenUrl
     })
     .then(() => {
         alert("Se pudo cargar la receta correctamente.");
