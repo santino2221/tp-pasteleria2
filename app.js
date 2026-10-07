@@ -1,76 +1,64 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
 
 let firebaseConfig = {
     databaseURL: "https://datos-de-pasteleria-default-rtdb.firebaseio.com"
 };
 
 let app = initializeApp(firebaseConfig);
-let database = getDatabase(app);
-let recetasRef = ref(database, 'recetas');
+let baseDeDatos = getDatabase(app);
 
-let formReceta = document.getElementById('formReceta');
+let recetasRef = ref(baseDeDatos, 'recetas');
+
+let miFormulario = document.getElementById('formReceta');
 let tablaRecetas = document.getElementById('tablaRecetas');
+let btnGuardar = document.getElementById('btnGuardar');
 
-let cargarRecetas = () => {
-    get(recetasRef).then((datosFirebase) => {
-        tablaRecetas.innerHTML = '';
-        if (datosFirebase.exists()) {
-            let datos = datosFirebase.toJSON();
-            for (let id in datos) {
-                let r = datos[id];
-                let fila = document.createElement('tr');
-                fila.innerHTML = `
+onValue(recetasRef, (datos) => {
+    let recetas = datos.val();
+    tablaRecetas.innerHTML = "";
+
+    if (recetas) {
+        for (let id in recetas) {
+            let r = recetas[id];
+            tablaRecetas.innerHTML += `
+                <tr>
                     <td><img src="${r.imagenUrl}" width="50"></td>
                     <td><strong>${r.nombreReceta}</strong></td>
                     <td>${r.pastelero}</td>
                     <td>${r.categoria}</td>
                     <td>${r.tiempoPreparacion} min</td>
                     <td>${r.dificultad}</td>
-                `;
-                tablaRecetas.appendChild(fila);
-            }
+                </tr>
+            `;
         }
-    }).catch(() => {
-        alert("No se pudo cargar la lista de recetas");
-    });
-};
-
-cargarRecetas();
-
-formReceta.addEventListener('submit', (evento) => {
-    evento.preventDefault();
-
-    let nombreReceta = document.getElementById('nombreReceta').value;
-    let pastelero = document.getElementById('pastelero').value;
-    let categoria = document.getElementById('categoria').value;
-    let tiempoPreparacion = document.getElementById('tiempoPreparacion').value;
-    let dificultad = document.getElementById('dificultad').value;
-    let imagenUrl = document.getElementById('imagenUrl').value;
-
-    if (!nombreReceta || !pastelero || !categoria || !tiempoPreparacion || !dificultad || !imagenUrl) {
-        alert("No se pudo cargar: tenés que completar todos los campos del formulario.");
-        return;
     }
+});
 
-    let idGenerado = nombreReceta.toLowerCase().split(' ').join('-');
+let inputNombreReceta = document.getElementById('nombreReceta');
+let inputPastelero = document.getElementById('pastelero');
+let inputCategoria = document.getElementById('categoria');
+let inputTiempoPreparacion = document.getElementById('tiempoPreparacion');
+let inputDificultad = document.getElementById('dificultad');
+let inputImagenUrl = document.getElementById('imagenUrl');
 
-    let nuevaRef = ref(database, 'recetas/' + idGenerado);
+btnGuardar.onclick = function () {
+    let idGenerado = inputNombreReceta.value;
+    let nuevaRef = ref(baseDeDatos, 'recetas/' + idGenerado);
 
     set(nuevaRef, {
-        nombreReceta: nombreReceta,
-        pastelero: pastelero,
-        categoria: categoria,
-        tiempoPreparacion: tiempoPreparacion,
-        dificultad: dificultad,
-        imagenUrl: imagenUrl
+        nombreReceta: inputNombreReceta.value,
+        pastelero: inputPastelero.value,
+        categoria: inputCategoria.value,
+        tiempoPreparacion: inputTiempoPreparacion.value,
+        dificultad: inputDificultad.value,
+        imagenUrl: inputImagenUrl.value
     })
     .then(() => {
-        alert("Se pudo cargar la receta correctamente.");
-        formReceta.reset();
-        cargarRecetas();
+        alert("Receta agregada correctamente");
+        miFormulario.reset();
     })
-    .catch(() => {
-        alert("No se pudo cargar la receta en Firebase.");
+    .catch((error) => {
+        alert("Error al agregar receta: " + error.message);
     });
-});
+};
